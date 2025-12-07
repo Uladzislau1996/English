@@ -1,70 +1,52 @@
 package ai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
-// Сервис, отвечающий за запросы к нейросети DeepSeek
+// Simplified AI client that provides offline corrections without paid APIs
 @Service
 public class AIClient {
 
-    @Value("${deepseek.api-key}")
-    private String apiKey;
+    public String askAI(String userMessage) {
+        String original = userMessage == null ? "" : userMessage.trim();
 
-    private final HttpClient http = HttpClient.newHttpClient();
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    public String askAI(String userMessage) throws Exception {
-
-        String prompt = """
-                You are an English tutor bot.
-                Tasks:
-                1) Reply to the user only in English and keep a friendly tone.
-                2) Provide a corrected version of the user's sentence.
-                3) Briefly explain the corrections.
-
-                User message: %s
-                """.formatted(userMessage);
-
-        var requestBody = objectMapper.createObjectNode();
-        requestBody.put("model", "deepseek-chat");
-        requestBody.putArray("messages")
-                .add(objectMapper.createObjectNode()
-                        .put("role", "user")
-                        .put("content", prompt));
-
-        String bodyJson = requestBody.toString();
-
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.deepseek.com/v1/chat/completions"))
-                .header("Authorization", "Bearer " + apiKey)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(bodyJson))
-                .build();
-
-        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-
-        if (resp.statusCode() >= 300) {
-            throw new IllegalStateException("AI request failed: " + resp.body());
+        if (original.isBlank()) {
+            return "Please send an English sentence so I can help correct it.";
         }
 
-        return extractContent(resp.body());
+        String corrected = capitalizeFirst(original);
+        boolean addedCapital = !corrected.equals(original);
+
+        if (!corrected.matches(".*[.!?]$")) {
+            corrected = corrected + ".";
+        }
+
+        StringBuilder explanation = new StringBuilder("Here's what I adjusted:\n");
+
+        if (addedCapital) {
+            explanation.append("• Started the sentence with a capital letter.\n");
+        }
+
+        if (!original.matches(".*[.!?]$")) {
+            explanation.append("• Added ending punctuation for completeness.\n");
+        }
+
+        if (explanation.toString().endsWith("adjusted:\n")) {
+            explanation.append("• Your sentence already looked good! I kept it as is and added a friendly confirmation.\n");
+        }
+
+        return "Corrected sentence: " + corrected + "\n\n" + explanation.toString().trim();
     }
 
-    private String extractContent(String json) throws Exception {
-        JsonNode root = objectMapper.readTree(json);
-        JsonNode contentNode = root.path("choices").path(0).path("message").path("content");
-
-        if (contentNode.isMissingNode() || contentNode.isNull()) {
-            throw new IllegalStateException("No content returned by AI");
+    private String capitalizeFirst(String text) {
+        if (text.isBlank()) {
+            return text;
         }
 
-        return contentNode.asText();
+        char firstChar = text.charAt(0);
+        if (Character.isLetter(firstChar) && Character.isLowerCase(firstChar)) {
+            return Character.toUpperCase(firstChar) + text.substring(1);
+        }
+
+        return text;
     }
 }
