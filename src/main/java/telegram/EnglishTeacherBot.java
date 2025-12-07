@@ -56,12 +56,8 @@ public class EnglishTeacherBot extends TelegramLongPollingBot {
             return;
         }
 
-        try {
-            String aiResponse = aiClient.askAI(msg);
-            send(chatId, aiResponse);
-        } catch (Exception e) {
-            send(chatId, "Sorry, I couldn't reach the AI right now: " + e.getMessage());
-        }
+        String aiResponse = aiClient.askAI(msg);
+        send(chatId, aiResponse);
     }
 
     private void send(Long chatId, String text) {
