@@ -32,13 +32,14 @@ public class AIClient {
                 User message: %s
                 """.formatted(userMessage);
 
-        String bodyJson = objectMapper.createObjectNode()
-                .put("model", "deepseek-chat")
-                .putArray("messages")
+        var requestBody = objectMapper.createObjectNode();
+        requestBody.put("model", "deepseek-chat");
+        requestBody.putArray("messages")
                 .add(objectMapper.createObjectNode()
                         .put("role", "user")
-                        .put("content", prompt))
-                .toString();
+                        .put("content", prompt));
+
+        String bodyJson = requestBody.toString();
 
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.deepseek.com/v1/chat/completions"))
