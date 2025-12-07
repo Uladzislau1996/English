@@ -40,9 +40,12 @@ public class EnglishTeacherBot extends TelegramLongPollingBot {
         Long chatId = update.getMessage().getChatId();
         String msg = update.getMessage().getText();
 
-        if ("/start".equalsIgnoreCase(msg)) {
-            send(chatId, "Hi! ✨ I am your English tutor bot.\n\n" +
-                    "Chat with me anytime for free — just send a message and I will correct and explain it for you.");
+        if (msg.equalsIgnoreCase("start") || msg.equalsIgnoreCase("/start")) {
+            send(chatId,
+                    "Hi! I'm Alex, your English-speaking friend. 😊\n\n" +
+                            "I will talk with you just like a real person and I will also correct your English gently.\n" +
+                            "Just send me any message — let's practice together!"
+            );
             return;
         }
 
