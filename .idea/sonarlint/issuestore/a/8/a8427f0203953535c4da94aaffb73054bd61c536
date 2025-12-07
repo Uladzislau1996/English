@@ -1,0 +1,13 @@
+
+|
+java:S1104"ZMake payment_status a static final constant or non-public and provide accessors if needed.(‡×ûàÿÿÿÿÿ8æô¨¨­3
+w
+java:S1104"ZMake price_currency a static final constant or non-public and provide accessors if needed.(×ŒÛ¶8æô¨¨­3
+z
+java:S1104"XMake price_amount a static final constant or non-public and provide accessors if needed.(ù¨ôˆýÿÿÿÿ8æô¨¨­3
+v
+java:S1104"TMake order_id a static final constant or non-public and provide accessors if needed.(Œ½”çøÿÿÿÿ8æô¨¨­3
+z	java:S116"YRename this field "payment_status" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(‡×ûàÿÿÿÿÿ8çô¨¨­3
+u	java:S116"YRename this field "price_currency" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(×ŒÛ¶8çô¨¨­3
+x	java:S116"WRename this field "price_amount" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ù¨ôˆýÿÿÿÿ8çô¨¨­3
+t	java:S116"SRename this field "order_id" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Œ½”çøÿÿÿÿ8çô¨¨­3

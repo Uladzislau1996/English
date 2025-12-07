@@ -1,0 +1,15 @@
+
+_
+java:S6813"BRemove this field injection and use constructor injection instead.(êæÄŞ8ÁØ¹¨­3
+_
+java:S6813"BRemove this field injection and use constructor injection instead.(êæÄŞ8ÁØ¹¨­3
+g
+java:S1874"JDon't override a deprecated method or explicitly mark it as "@Deprecated".(®É–Ø8ÃØ¹¨­3
+T
+java:S6126+"2Replace this String concatenation with Text block.(‹°æÆùÿÿÿÿ8ÅØ¹¨­3
+]	java:S125/"<This block of commented-out lines of code should be removed.(“ÁİŸùÿÿÿÿ8¬å²ª­3
+]	java:S125>"<This block of commented-out lines of code should be removed.(é˜’çşÿÿÿÿ8³Î±ª­3
+E	java:S108L")Either remove or fill this block of code.(¨šşµ8ÈØ¹¨­3
+E	java:S108Y")Either remove or fill this block of code.(ÃèÜŒ8ÉØ¹¨­3
+T
+java:S1144O"2Remove this unused private "sendPayButton" method.(”ËÙĞúÿÿÿÿ8±å²ª­3
