@@ -10,10 +10,15 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class EnglishTeacherBot extends TelegramLongPollingBot {
+
+    private static final Logger log = LoggerFactory.getLogger(EnglishTeacherBot.class);
 
     @Value("${telegram.bot-token}")
     private String botToken;
@@ -27,7 +32,15 @@ public class EnglishTeacherBot extends TelegramLongPollingBot {
     @PostConstruct
     public void registerBot() throws TelegramApiException {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-        botsApi.registerBot(this);
+        try {
+            botsApi.registerBot(this);
+        } catch (TelegramApiRequestException e) {
+            if (e.getErrorCode() == 404) {
+                log.warn("Telegram returned 404 while clearing webhook; continuing with long polling", e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
