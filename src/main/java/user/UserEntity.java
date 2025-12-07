@@ -1,8 +1,8 @@
 package user;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +12,9 @@ public class UserEntity {
     @Id
     private Long userId;
     private LocalDateTime premiumUntil;
+
+    public UserEntity() {
+    }
 
     public Long getUserId() {
         return userId;

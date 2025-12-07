@@ -1,5 +1,7 @@
 package payment;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,19 +23,18 @@ public class NowPaymentsClient {
     private String successUrl;
 
     private final HttpClient http = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String createInvoice(Long telegramUserId) throws Exception {
 
-        String bodyJson = """
-                {
-                  "price_amount": 1,
-                  "price_currency": "usdterc20",
-                  "pay_currency": "fiat",
-                  "order_id": "%s",
-                  "success_url": "%s",
-                  "ipn_callback_url": "%s"
-                }
-                """.formatted(telegramUserId, successUrl, callbackUrl);
+        String bodyJson = objectMapper.createObjectNode()
+                .put("price_amount", 1)
+                .put("price_currency", "usdterc20")
+                .put("pay_currency", "fiat")
+                .put("order_id", String.valueOf(telegramUserId))
+                .put("success_url", successUrl)
+                .put("ipn_callback_url", callbackUrl)
+                .toString();
 
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.nowpayments.io/v1/invoice"))
@@ -44,15 +45,21 @@ public class NowPaymentsClient {
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
-        // Возвращаем ссылку на оплату
+        if (resp.statusCode() >= 300) {
+            throw new IllegalStateException("Invoice request failed: " + resp.body());
+        }
+
         return extractInvoiceUrl(resp.body());
     }
 
-    private String extractInvoiceUrl(String json) {
-        // например, json: {"id":123,"invoice_url":"https://nowpayments..."}
-        int i = json.indexOf("invoice_url");
-        int start = json.indexOf("\"", i + 13) + 1;
-        int end = json.indexOf("\"", start);
-        return json.substring(start, end);
+    private String extractInvoiceUrl(String json) throws Exception {
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode urlNode = root.path("invoice_url");
+
+        if (urlNode.isMissingNode() || urlNode.isNull()) {
+            throw new IllegalStateException("Invoice URL was not returned: " + json);
+        }
+
+        return urlNode.asText();
     }
 }

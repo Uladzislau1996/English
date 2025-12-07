@@ -1,5 +1,7 @@
 package ai;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,27 +18,27 @@ public class AIClient {
     private String apiKey;
 
     private final HttpClient http = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String askAI(String userMessage) throws Exception {
 
         String prompt = """
                 You are an English tutor bot.
                 Tasks:
-                1) Answer the user's message in natural English.
+                1) Reply to the user only in English and keep a friendly tone.
                 2) Provide a corrected version of the user's sentence.
-                3) Explain briefly what was wrong.
+                3) Briefly explain the corrections.
 
                 User message: %s
                 """.formatted(userMessage);
 
-        String bodyJson = """
-                {
-                  "model": "deepseek-chat",
-                  "messages": [
-                    {"role": "user", "content": "%s"}
-                  ]
-                }
-                """.formatted(prompt.replace("\"", "\\\""));
+        String bodyJson = objectMapper.createObjectNode()
+                .put("model", "deepseek-chat")
+                .putArray("messages")
+                .add(objectMapper.createObjectNode()
+                        .put("role", "user")
+                        .put("content", prompt))
+                .toString();
 
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.deepseek.com/v1/chat/completions"))
@@ -47,14 +49,21 @@ public class AIClient {
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
+        if (resp.statusCode() >= 300) {
+            throw new IllegalStateException("AI request failed: " + resp.body());
+        }
+
         return extractContent(resp.body());
     }
 
-    private String extractContent(String json) {
-        // Очень простое извлечение (лучше сделать через Jackson)
-        int i = json.indexOf("\"content\"");
-        int start = json.indexOf("\"", i + 10) + 1;
-        int end = json.indexOf("\"", start);
-        return json.substring(start, end);
+    private String extractContent(String json) throws Exception {
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode contentNode = root.path("choices").path(0).path("message").path("content");
+
+        if (contentNode.isMissingNode() || contentNode.isNull()) {
+            throw new IllegalStateException("No content returned by AI");
+        }
+
+        return contentNode.asText();
     }
 }

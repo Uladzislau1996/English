@@ -18,8 +18,9 @@ public class PaymentController {
     @PostMapping("/callback")
     public ResponseEntity<?> callback(@RequestBody PaymentCallback payload) {
 
-        if (payload.payment_status.equalsIgnoreCase("finished")
-                && payload.price_currency.equalsIgnoreCase("usdterc20")
+        if (payload != null
+                && "finished".equalsIgnoreCase(payload.payment_status)
+                && "usdterc20".equalsIgnoreCase(payload.price_currency)
                 && payload.price_amount == 1.0) {
 
             long userId = Long.parseLong(payload.order_id);
