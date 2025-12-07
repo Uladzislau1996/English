@@ -9,15 +9,15 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Component
 public class BotInitializer {
 
-    private final EnglishTeacherBot bot;
+    private final EnglishTeacherBot englishTeacherBot;
 
-    public BotInitializer(EnglishTeacherBot bot) {
-        this.bot = bot;
+    public BotInitializer(EnglishTeacherBot englishTeacherBot) {
+        this.englishTeacherBot = englishTeacherBot;
     }
 
     @PostConstruct
-    public void init() throws TelegramApiException {
-        TelegramBotsApi api = new TelegramBotsApi(DefaultBotSession.class);
-        api.registerBot(bot);
+    public void init() throws Exception {
+        TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+        botsApi.registerBot(englishTeacherBot);
     }
 }
